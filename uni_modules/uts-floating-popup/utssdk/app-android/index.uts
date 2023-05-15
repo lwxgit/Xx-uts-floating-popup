@@ -1,0 +1,411 @@
+import Service from "android.app.Service";
+import Intent from "android.content.Intent";
+import IBinder from "android.os.IBinder";
+import View from "android.view.View";
+// import Paint from "android.graphics.Paint";
+// import FontMetrics from "android.graphics.Paint.FontMetrics";
+
+import Context from "android.content.Context";
+// import Canvas from "android.graphics.Canvas";
+import Color from "android.graphics.Color";
+// import AttributeSet from "android.util.AttributeSet";
+
+
+import PixelFormat from "android.graphics.PixelFormat";
+import Gravity from "android.view.Gravity";
+import WindowManager from "android.view.WindowManager";
+// import R from "uts.sdk.modules.utsFloatingPopup.R";
+// import LayoutInflater from "android.view.LayoutInflater";
+// import RelativeLayout from "android.widget.RelativeLayout";
+
+import LinearLayout from "android.widget.LinearLayout";
+import TextView from "android.widget.TextView";
+
+import GradientDrawable from "android.graphics.drawable.GradientDrawable";
+import ImageView from "android.widget.ImageView";
+import WRAP_CONTENT from "android.view.ViewGroup.LayoutParams.WRAP_CONTENT";
+import MATCH_PARENT from "android.view.ViewGroup.LayoutParams.MATCH_PARENT";
+// import Button from "android.widget.Button";
+import DisplayMetrics from "android.util.DisplayMetrics";
+import Glide from "com.bumptech.glide.Glide";
+import PandoraEntryActivity from "io.dcloud.PandoraEntryActivity";
+
+import ActivityManager from "android.app.ActivityManager";
+import RunningAppProcessInfo from "android.app.ActivityManager.RunningAppProcessInfo";
+
+
+// import { UTSAndroid } from "io.dcloud.uts";
+
+import {
+    onAppActivityDestroy,
+    onAppActivityPause,
+    onAppActivityResume,
+    onAppActivityBack,
+	onAppActivityResult,
+	onAppTrimMemory,
+	onAppConfigChange,
+	getUniActivity,
+	getAppContext
+} from "io.dcloud.uts.android";
+
+/**
+ * 弹窗服务类
+ */
+class FloatService extends Service {
+	customViewManager: CustomViewManager ;
+	constructor() {
+		super();
+		console.log("实例化弹窗服务")
+		this.customViewManager =  new CustomViewManager(this)
+	}
+    override onCreate() {
+		// console.log("FloatService onCreate")
+        super.onCreate()
+        
+    }
+
+    override onBind(intent: Intent): IBinder | null {
+		console.log('onBind')
+        return null
+    }
+	
+	override onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+		console.log('启动服务：FloatService-onStartCommand')
+		if(this.customViewManager != null){
+			console.log('call showFloatViewOnWindow')
+			this.customViewManager.showFloatViewOnWindow()
+		}else{
+			console.log('call showFloatViewOnWindow fail this.customViewManager = null')
+		}
+		
+		return super.onStartCommand(intent, flags, startId)
+	}
+}
+
+/**
+ * 连接 点击事件
+ */
+class custClick extends View.OnClickListener {
+	mCustomViewManager: CustomViewManager | null
+	constructor (customViewManager: CustomViewManager | null) {
+		super()
+		this.mCustomViewManager = customViewManager
+	}
+	override onClick(v : View){
+		console.log('call custClick')
+		if(this.mCustomViewManager != null){
+			
+			this.mCustomViewManager!.removeView()
+			// 如果app在后台 回到原app
+			console.log(isBackground())
+			if(isBackground()){
+				getUniActivity()?.startActivity(new Intent(getUniActivity(), PandoraEntryActivity().javaClass))
+			}
+			if(custCallback != null){
+				custCallback!()
+			}
+		}else{
+			console.log('call custClick fail')
+		}
+	}
+}
+
+/**
+ * 点击关闭事件
+ */
+class custCloseClick extends View.OnClickListener {
+	mCustomViewManager: CustomViewManager | null
+	constructor (customViewManager: CustomViewManager | null) {
+		super()
+		this.mCustomViewManager = customViewManager
+	}
+	
+	override onClick(v : View){
+		console.log('call custClick')
+		// console.log(v)
+		
+		if(this.mCustomViewManager != null){
+			this.mCustomViewManager!.removeView()
+		}else{
+			console.log('call custCloseClick fail')
+		}
+	}
+}
+
+/**
+ * 点击不关闭事件
+ */
+class custNoCloseClick extends View.OnClickListener {
+	override onClick(v : View){
+		console.log('custNoCloseClick')
+	}
+}
+/**
+ * 关闭按钮视图
+ */
+class closeButton extends TextView {
+	constructor (context: Context | null){
+		super(context)
+		this.setWidth(80)
+		this.setHeight(80)
+		this.setBackgroundDrawable(context?.getDrawable(android.R.drawable.presence_offline))
+	}
+}
+/**
+ * 设备名称视图
+ */
+class deviceNameView extends TextView {
+	constructor (context: Context | null, deviceNameText: String){
+		super(context)
+		this.setText(deviceNameText)
+		this.setTextColor(Color.parseColor("#000000"));
+		this.setTextSize((20).toFloat());
+		this.setPadding(0, 50, 0, 50)
+	}
+}
+/**
+ * 连接按钮视图
+ */
+class connectButton extends TextView {
+	constructor (context: Context | null){
+		super(context)
+		let drawable1 = new GradientDrawable()
+		drawable1.setColor(Color.parseColor("#0082FC"));
+		drawable1.setCornerRadius((60).toFloat());
+		this.setBackgroundDrawable(drawable1)
+		this.setTextColor(Color.parseColor("#FFFFFF"))
+		this.setPadding(150, 10, 150, 10)
+		this.setText("连接设备")
+	}
+}
+
+/**
+ * 判断是否在后台
+ */
+function getBrandLogo(brandLogoUrl:String, p:View):ImageView {
+	let brandLogo = new ImageView(getUniActivity())
+	Glide.with(p).load(brandLogoUrl).into(brandLogo)
+    return brandLogo;
+}
+
+/**
+ * 大小设置
+ */
+function getBrandLogoParms():LinearLayout.LayoutParams {
+	let brandLogoWidth = 800
+	let brandLogoHeight = (brandLogoWidth / 2.47).toInt()
+	let brandLogoParms = new LinearLayout.LayoutParams(brandLogoWidth, brandLogoHeight)
+	return brandLogoParms
+}
+
+/**
+ * 通知自定义视图
+ */
+class NoticeView extends LinearLayout {
+
+    constructor (context: Context | null, mCustomViewManager: CustomViewManager | null) {
+		super(context)
+		console.log('NoticeView constructor')
+		this.setOnClickListener(new custNoCloseClick())
+		// 设置元素排版 垂直
+		this.setOrientation(LinearLayout.VERTICAL)
+		// 设置元素水平居中
+		this.setGravity(Gravity.CENTER_HORIZONTAL)
+		// 设置内边距
+		this.setPadding(50,50,50,50)
+        let drawable = new GradientDrawable()
+		drawable.setCornerRadius((60).toFloat());
+		drawable.setColor(Color.parseColor("#FFFFFF"));
+		this.setBackground(drawable)
+		console.log('设置方向 背景')
+		// 设置关闭按钮
+		console.log('设置关闭按钮')
+		let buttonClose = new closeButton(getUniActivity())
+		let parmsLl = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+		let parmsClose = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+		// this.addView(buttonClose, parmsClose)
+		this.mCustCloseClick = new custCloseClick(mCustomViewManager)
+		buttonClose.setOnClickListener(this.mCustCloseClick)
+		let ll = new LinearLayout(context)
+		ll.addView(buttonClose, parmsClose)
+		ll.setGravity(Gravity.RIGHT)
+		this.addView(ll, parmsLl)
+		
+		// 设置图片
+		console.log('设置图片')
+		let brandLogoUrl: String = "https://pics4.baidu.com/feed/42a98226cffc1e17573493b9b52c0d06718de9f6.jpeg"
+		let brandLogo = getBrandLogo(brandLogoUrl, this)
+		let brandLogoParms = getBrandLogoParms()
+		this.addView(brandLogo, brandLogoParms)
+		
+		// 设置文本
+		console.log('设置设备名称')
+		let deviceNameText: String = 'AirPods'
+		let deviceName = new deviceNameView(getUniActivity(), deviceNameText)
+		let deviceNameParms = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+		this.addView(deviceName, deviceNameParms)
+		
+		// 设置按钮
+		let button = new connectButton(getUniActivity())
+		let parms1 = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+		this.addView(button, parms1)
+		this.mCustClick = new custClick(mCustomViewManager)
+		button.setOnClickListener(this.mCustClick)
+		console.log('设置连接按钮')
+    }
+	mCustClick: custClick | null = null
+	mCustCloseClick: custCloseClick | null = null
+}
+
+/**
+ * 全局布局视图
+ */
+class ParentView extends LinearLayout {
+
+    constructor (context: Context | null, mCustomViewManager: CustomViewManager | null) {
+		super(context)
+		console.log('ParentView constructor')
+		// let drawable = new GradientDrawable()
+		// drawable.setCornerRadius((60).toFloat());
+		// drawable.setColor(Color.parseColor("#AAAAAA"));
+		// this.setBackground(drawable)
+		this.setPadding(0,0,0,20)
+		this.setGravity(Gravity.BOTTOM)
+		let cNoticeView = new NoticeView(getUniActivity(), mCustomViewManager)
+		let parms1 = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+		this.addView(cNoticeView, parms1)
+		this.setOnClickListener(new custCloseClick(mCustomViewManager))
+		console.log('ParentView constructor over')
+    }
+}
+
+/**
+ * 自定义视图管理类
+ */
+class CustomViewManager {
+    //上下文
+    mContext: Context | null
+
+    //自定义的FloatView
+    // mNoticeView: NoticeView | null = null
+    mNoticeView: ParentView | null = null
+
+    //窗口管理类
+    mWindowManager: WindowManager | null = null
+
+    constructor (context: Context | null) {
+		console.log("实例化自定义视图管理类")
+        this.mContext = context
+        this.mWindowManager = getUniActivity()!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+		
+    }
+	
+	/**
+	 * @param
+	 * @description 移除视图
+	 */
+	removeView(){
+		this.mWindowManager!.removeView(this.mNoticeView)
+	}
+
+    /**
+     * @param
+     * @description 在手机屏幕上显示自定义的FloatView
+     */
+    showFloatViewOnWindow() {
+		console.log('实例化窗口')
+		if(this.mNoticeView == null){
+			// this.mNoticeView = new NoticeView(getUniActivity())
+			this.mNoticeView = new ParentView(getUniActivity(), this)
+		}
+        let parmas = WindowManager.LayoutParams()
+		console.log('设置宽高')
+        // parmas.width = WindowManager.LayoutParams.MATCH_PARENT
+		// 获取屏幕宽度 设置90%宽度
+		let displayMetrics: DisplayMetrics | null = getUniActivity()?.getResources()?.getDisplayMetrics()
+		let width = displayMetrics?.widthPixels
+		if(width != null){
+			parmas.width = (width * 0.9).toInt()
+		}else{
+			parmas.width = WindowManager.LayoutParams.MATCH_PARENT
+		}
+        // parmas.height = WindowManager.LayoutParams.WRAP_CONTENT
+        parmas.height = WindowManager.LayoutParams.MATCH_PARENT
+		console.log('设置位置')
+        //窗口图案放置位置
+        // parmas.gravity = Gravity.LEFT || Gravity.CENTER
+        parmas.gravity = Gravity.BOTTOM
+        // 如果忽略gravity属性，那么它表示窗口的绝对X位置。
+        parmas.x = 0
+        //如果忽略gravity属性，那么它表示窗口的绝对Y位置。
+        parmas.y = 100
+        ////电话窗口。它用于电话交互（特别是呼入）。它置于所有应用程序之上，状态栏之下。
+//        if (Build.VERSION.SDK_INT > 24) {
+//            wmParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+//        } else {
+//            wmParams.type = WindowManager.LayoutParams.TYPE_TOAST;
+//        }
+        parmas.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        //FLAG_NOT_FOCUSABLE让window不能获得焦点，这样用户快就不能向该window发送按键事件及按钮事件
+        //FLAG_NOT_TOUCH_MODAL即使在该window在可获得焦点情况下，仍然把该window之外的任何event发送到该window之后的其他window.
+        parmas.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        // 期望的位图格式。默认为不透明。参考android.graphics.PixelFormat。
+        parmas.format = PixelFormat.RGBA_8888
+		// let customView: View =  LayoutInflater.from(getUniActivity()).inflate(R.layout.layout_custom_view, new RelativeLayout(getUniActivity()), true);
+		// this.mNoticeView =  new NoticeView(getUniActivity());
+		// console.log(this.mNoticeView)
+		if(this.mNoticeView != null){
+			// mNoticeView存在不添加
+			if(this.mNoticeView?.getWindowToken() == null){
+				this.mWindowManager!.addView(this.mNoticeView, parmas)
+			}
+		}
+		
+    }
+}
+
+let isOpenAppFlag:Int = 0
+let custCallback: UTSCallback | null = null
+let custDeviceInfo: UTSJSONObject | null = null
+
+/**
+ * 判断是否在后台
+ */
+function isBackground():boolean {
+    let activityManager:ActivityManager = getUniActivity()?.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager;
+    let appProcesses = activityManager.getRunningAppProcesses();
+	
+    for (let appProcess in appProcesses) {
+		// console.log(appProcess.processName)
+		// console.log(getUniActivity()?.packageName)
+         if (appProcess.processName == getUniActivity()?.packageName) {
+			 // console.log(appProcess.importance)
+			 // console.log(RunningAppProcessInfo.IMPORTANCE_FOREGROUND)
+			  // || appProcess.importance == RunningAppProcessInfo.IMPORTANCE_BACKGROUND
+                if (appProcess.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                          // Log.i("前台", appProcess.processName);
+                          return false;
+                }else{
+                          // Log.i("后台", appProcess.processName);
+                          return true;
+                } 
+           }
+    }
+    return false;
+}
+
+/**
+ * 弹窗窗口
+ * @param isOpenApp 是否
+ */
+export function startFloating(deviceInfo: UTSJSONObject, success: UTSCallback) {
+	console.log('call startFloating')
+	console.log(getAppContext()!.getExternalCacheDir()!.getPath())
+	custCallback = success
+	custDeviceInfo = deviceInfo
+	// if(isBackground()){
+		getUniActivity()?.startService(new Intent(getUniActivity(), FloatService().javaClass))
+	// }else{
+	// 	console.log('在前台，不弹窗')
+	// }
+}
