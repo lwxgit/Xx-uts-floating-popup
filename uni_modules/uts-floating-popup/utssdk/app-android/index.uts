@@ -306,6 +306,8 @@ class CustomViewManager {
 	 */
 	removeView(){
 		this.mWindowManager!.removeView(this.mNoticeView)
+        // 关闭弹窗时移除视图
+        this.mNoticeView = null
 	}
 
     /**
