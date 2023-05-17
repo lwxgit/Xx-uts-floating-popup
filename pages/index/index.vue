@@ -9,7 +9,7 @@
 </template>
 
 <script>
-	import { startFloating } from "@/uni_modules/uts-floating-popup";
+	import { startFloating } from "@/uni_modules/xx-uts-floating-popup";
 	export default {
 		components: {
 		},
