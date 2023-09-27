@@ -25,6 +25,7 @@ import GradientDrawable from "android.graphics.drawable.GradientDrawable";
 import ImageView from "android.widget.ImageView";
 import WRAP_CONTENT from "android.view.ViewGroup.LayoutParams.WRAP_CONTENT";
 import MATCH_PARENT from "android.view.ViewGroup.LayoutParams.MATCH_PARENT";
+import MotionEvent from "android.view.MotionEvent";
 // import Button from "android.widget.Button";
 import DisplayMetrics from "android.util.DisplayMetrics";
 import Glide from "com.bumptech.glide.Glide";
@@ -201,7 +202,7 @@ function getBrandLogoParms():LinearLayout.LayoutParams {
 /**
  * 通知自定义视图
  */
-class NoticeView extends LinearLayout {
+class NoticeView extends LinearLayout  {
 
     constructor (context: Context | null, mCustomViewManager: CustomViewManager | null) {
 		super(context)
@@ -255,6 +256,7 @@ class NoticeView extends LinearLayout {
     }
 	mCustClick: custClick | null = null
 	mCustCloseClick: custCloseClick | null = null
+    
 }
 
 /**
@@ -273,16 +275,18 @@ class ParentView extends LinearLayout {
 		this.setGravity(Gravity.BOTTOM)
 		let cNoticeView = new NoticeView(getUniActivity(), mCustomViewManager)
 		let parms1 = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        cNoticeView.setOnTouchListener(mCustomViewManager)
 		this.addView(cNoticeView, parms1)
 		this.setOnClickListener(new custCloseClick(mCustomViewManager))
 		console.log('ParentView constructor over')
     }
+    
 }
 
 /**
  * 自定义视图管理类
  */
-class CustomViewManager {
+class CustomViewManager implements View.OnTouchListener {
     //上下文
     mContext: Context | null
 
@@ -292,6 +296,10 @@ class CustomViewManager {
 
     //窗口管理类
     mWindowManager: WindowManager | null = null
+    mParmas : WindowManager.LayoutParams | null = null
+    
+    mInViewX: Int = 0
+    mInViewY: Int = 0
 
     constructor (context: Context | null) {
 		console.log("实例化自定义视图管理类")
@@ -320,6 +328,7 @@ class CustomViewManager {
 			// this.mNoticeView = new NoticeView(getUniActivity())
 			this.mNoticeView = new ParentView(getUniActivity(), this)
 		}
+        // this.mNoticeView.setOnTouchListener(this)
         let parmas = WindowManager.LayoutParams()
 		console.log('设置宽高')
         // parmas.width = WindowManager.LayoutParams.MATCH_PARENT
@@ -347,7 +356,8 @@ class CustomViewManager {
 //        } else {
 //            wmParams.type = WindowManager.LayoutParams.TYPE_TOAST;
 //        }
-        parmas.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        parmas.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        // parmas.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         //FLAG_NOT_FOCUSABLE让window不能获得焦点，这样用户快就不能向该window发送按键事件及按钮事件
         //FLAG_NOT_TOUCH_MODAL即使在该window在可获得焦点情况下，仍然把该window之外的任何event发送到该window之后的其他window.
         parmas.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -356,6 +366,7 @@ class CustomViewManager {
 		// let customView: View =  LayoutInflater.from(getUniActivity()).inflate(R.layout.layout_custom_view, new RelativeLayout(getUniActivity()), true);
 		// this.mNoticeView =  new NoticeView(getUniActivity());
 		// console.log(this.mNoticeView)
+        this.mParmas = parmas
 		if(this.mNoticeView != null){
 			// mNoticeView存在不添加
 			if(this.mNoticeView?.getWindowToken() == null){
@@ -364,6 +375,49 @@ class CustomViewManager {
 		}
 		
     }
+    
+    override onTouch(view: View, motionEvent: MotionEvent): boolean {
+        console.log("onTouch123123")
+         return this.floatLayoutTouch(motionEvent);
+         // 
+         // return true;
+     }
+     
+    floatLayoutTouch( motionEvent: MotionEvent): boolean {
+         switch (motionEvent.getAction()) {
+             case MotionEvent.ACTION_DOWN:
+                 // 获取相对View的坐标，即以此View左上角为原点
+                 this.mInViewX = motionEvent.getX().toInt();
+                 this.mInViewY = motionEvent.getY().toInt();
+                 // // 获取相对屏幕的坐标，即以屏幕左上角为原点
+                 // mDownInScreenX = motionEvent.getRawX();
+                 // mDownInScreenY = motionEvent.getRawY() - getSysBarHeight(mContext);
+                 // mInScreenX = motionEvent.getRawX();
+                 // mInScreenY = motionEvent.getRawY() - getSysBarHeight(mContext);
+                 break;
+             case MotionEvent.ACTION_MOVE:
+                 // 更新浮动窗口位置参数
+                 let mInScreenX = motionEvent.getRawX().toInt();
+                 // let mInScreenY = motionEvent.getRawY() - getSysBarHeight(mContext);
+                 let mInScreenY = motionEvent.getRawY().toInt();
+                 // let mWindowParams = WindowManager.LayoutParams()
+                 this.mParmas!.x = mInScreenX- this.mInViewX;
+                 this.mParmas!.y = mInScreenY - this.mInViewY;
+                 // 手指移动的时候更新小悬浮窗的位置
+                 if(this.mNoticeView?.getWindowToken() != null){
+                     this.mWindowManager!.updateViewLayout(this.mNoticeView, this.mParmas);
+                 }
+                 
+                 break;
+             case MotionEvent.ACTION_UP:
+                 // 如果手指离开屏幕时，xDownInScreen和xInScreen相等，且yDownInScreen和yInScreen相等，则视为触发了单击事件。
+    //              if (mDownInScreenX  == mInScreenX && mDownInScreenY == mInScreenY){
+    
+    //              }
+                 break;
+         }
+         return true;
+     }
 }
 
 let isOpenAppFlag:Int = 0
