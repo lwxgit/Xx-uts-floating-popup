@@ -27,13 +27,13 @@ import WRAP_CONTENT from "android.view.ViewGroup.LayoutParams.WRAP_CONTENT";
 import MATCH_PARENT from "android.view.ViewGroup.LayoutParams.MATCH_PARENT";
 // import Button from "android.widget.Button";
 import DisplayMetrics from "android.util.DisplayMetrics";
-import Glide from "com.bumptech.glide.Glide";
+// import Glide from "com.bumptech.glide.Glide";
 import PandoraEntryActivity from "io.dcloud.PandoraEntryActivity";
 
 import ActivityManager from "android.app.ActivityManager";
 import RunningAppProcessInfo from "android.app.ActivityManager.RunningAppProcessInfo";
 
-
+import Build from "android.os.Build"
 // import { UTSAndroid } from "io.dcloud.uts";
 
 import {
@@ -99,7 +99,7 @@ class custClick extends View.OnClickListener {
 			// 如果app在后台 回到原app
 			console.log(isBackground())
 			if(isBackground()){
-				getUniActivity()?.startActivity(new Intent(getUniActivity(), PandoraEntryActivity().javaClass))
+				getUniActivity()?.startActivity(new Intent(getUniActivity(), getUniActivity()!.javaClass))
 			}
 			if(custCallback != null){
 				custCallback!()
@@ -184,7 +184,7 @@ class connectButton extends TextView {
  */
 function getBrandLogo(brandLogoUrl:String, p:View):ImageView {
 	let brandLogo = new ImageView(getUniActivity())
-	Glide.with(p).load(brandLogoUrl).into(brandLogo)
+	// Glide.with(p).load(brandLogoUrl).into(brandLogo)
     return brandLogo;
 }
 
@@ -192,7 +192,7 @@ function getBrandLogo(brandLogoUrl:String, p:View):ImageView {
  * 大小设置
  */
 function getBrandLogoParms():LinearLayout.LayoutParams {
-	let brandLogoWidth = 800
+	let brandLogoWidth = (800).toInt()
 	let brandLogoHeight = (brandLogoWidth / 2.47).toInt()
 	let brandLogoParms = new LinearLayout.LayoutParams(brandLogoWidth, brandLogoHeight)
 	return brandLogoParms
@@ -342,12 +342,12 @@ class CustomViewManager {
         //如果忽略gravity属性，那么它表示窗口的绝对Y位置。
         parmas.y = 100
         ////电话窗口。它用于电话交互（特别是呼入）。它置于所有应用程序之上，状态栏之下。
-//        if (Build.VERSION.SDK_INT > 24) {
-//            wmParams.type = WindowManager.LayoutParams.TYPE_PHONE;
-//        } else {
-//            wmParams.type = WindowManager.LayoutParams.TYPE_TOAST;
-//        }
-        parmas.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+           parmas.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+       } else {
+           parmas.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+       }
+        // parmas.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         //FLAG_NOT_FOCUSABLE让window不能获得焦点，这样用户快就不能向该window发送按键事件及按钮事件
         //FLAG_NOT_TOUCH_MODAL即使在该window在可获得焦点情况下，仍然把该window之外的任何event发送到该window之后的其他window.
         parmas.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
