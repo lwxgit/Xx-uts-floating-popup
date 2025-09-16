@@ -1,7 +1,7 @@
 {
   "id": "xx-uts-floating-popup",
   "displayName": "uts android 悬浮窗示例",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "基于uniapp和uts开放的安卓悬浮窗",
   "keywords": [
     "uts",
@@ -10,7 +10,7 @@
 ],
   "repository": "https://github.com/lwxgit/Xx-uts-floating-popup",
   "engines": {
-    "HBuilderX": "^3.6.0"
+    "HBuilderX": "^3.99"
   },
   "dcloudext": {
     "type": "uts",
