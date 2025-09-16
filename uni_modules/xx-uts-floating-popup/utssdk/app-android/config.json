@@ -3,7 +3,7 @@
 	"dependencies": [
 		{
 			"id": "com.github.bumptech.glide:glide",
-			"source": "implementation 'com.github.bumptech.glide:glide:4.11.0'"
+			"source": "implementation('com.github.bumptech.glide:glide:4.11.0') {exclude group: 'androidx.core', module: 'core'}"
 		}
 	],
 	"minSdkVersion": "21"
