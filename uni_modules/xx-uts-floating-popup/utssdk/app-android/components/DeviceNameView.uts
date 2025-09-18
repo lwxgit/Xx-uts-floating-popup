@@ -1,0 +1,16 @@
+import TextView from "android.widget.TextView";
+import Context from "android.content.Context";
+import Color from "android.graphics.Color";
+
+/**
+ * 设备名称视图组件
+ */
+export class DeviceNameView extends TextView {
+    constructor (context: Context | null, deviceNameText: String){
+        super(context);
+        this.setText(deviceNameText);
+        this.setTextColor(Color.parseColor("#000000"));
+        this.setTextSize((20).toFloat());
+        this.setPadding(0, 50, 0, 50);
+    }
+}

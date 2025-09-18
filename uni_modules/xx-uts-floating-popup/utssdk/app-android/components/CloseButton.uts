@@ -1,0 +1,14 @@
+import TextView from "android.widget.TextView";
+import Context from "android.content.Context";
+
+/**
+ * 关闭按钮视图组件
+ */
+export class CloseButton extends TextView {
+    constructor (context: Context | null){
+        super(context);
+        this.setWidth(80);
+        this.setHeight(80);
+        this.setBackgroundDrawable(context?.getDrawable(android.R.drawable.presence_offline));
+    }
+}

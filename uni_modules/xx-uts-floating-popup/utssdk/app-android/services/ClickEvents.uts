@@ -1,0 +1,67 @@
+import View from "android.view.View";
+import Intent from "android.content.Intent";
+import { getUniActivity } from "io.dcloud.uts.android";
+import { isBackground } from "../utils/ViewUtils";
+
+// 直接导入CustomViewManager类
+import { CustomViewManager } from "../managers/CustomViewManager";
+
+// 全局回调和设备信息变量
+export let custCallback: UTSCallback | null = null;
+
+/**
+ * 连接点击事件处理类
+ */
+export class CustClick extends View.OnClickListener {
+    mCustomViewManager: CustomViewManager | null;
+    constructor (customViewManager: CustomViewManager | null) {
+        super();
+        this.mCustomViewManager = customViewManager;
+    }
+    override onClick(v : View){
+        console.log('call CustClick');
+        if(this.mCustomViewManager != null){
+            this.mCustomViewManager!.removeView();
+            // 如果app在后台 回到原app
+            console.log(isBackground());
+            if(isBackground()){
+                getUniActivity()?.startActivity(new Intent(getUniActivity(), getUniActivity()!.javaClass));
+            }
+            // 使用导出的回调函数
+            if(custCallback != null){
+                custCallback!();
+            }
+        }else{
+            console.log('call CustClick fail');
+        }
+    }
+}
+
+/**
+ * 关闭点击事件处理类
+ */
+export class CustCloseClick extends View.OnClickListener {
+    mCustomViewManager: CustomViewManager | null;
+    constructor (customViewManager: CustomViewManager | null) {
+        super();
+        this.mCustomViewManager = customViewManager;
+    }
+    
+    override onClick(v : View){
+        console.log('call CustCloseClick');
+        if(this.mCustomViewManager != null){
+            this.mCustomViewManager!.removeView();
+        }else{
+            console.log('call CustCloseClick fail');
+        }
+    }
+}
+
+/**
+ * 点击不关闭事件处理类
+ */
+export class CustNoCloseClick extends View.OnClickListener {
+    override onClick(v : View){
+        console.log('CustNoCloseClick');
+    }
+}

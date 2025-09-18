@@ -1,0 +1,39 @@
+import Service from "android.app.Service";
+import Intent from "android.content.Intent";
+import IBinder from "android.os.IBinder";
+import Context from "android.content.Context";
+import { CustomViewManager } from "../managers/CustomViewManager";
+
+/**
+ * 弹窗服务类
+ */
+export class FloatService extends Service {
+    customViewManager: CustomViewManager;
+    constructor() {
+        super();
+        console.log("实例化弹窗服务");
+        this.customViewManager = new CustomViewManager(this);
+    }
+    
+    override onCreate() {
+        console.log("FloatService onCreate");
+        super.onCreate();
+    }
+
+    override onBind(intent: Intent): IBinder | null {
+        console.log('onBind');
+        return null;
+    }
+    
+    override onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        console.log('启动服务：FloatService-onStartCommand');
+        if(this.customViewManager != null){
+            console.log('call showFloatViewOnWindow');
+            this.customViewManager.showFloatViewOnWindow();
+        }else{
+            console.log('call showFloatViewOnWindow fail this.customViewManager = null');
+        }
+        
+        return super.onStartCommand(intent, flags, startId);
+    }
+}

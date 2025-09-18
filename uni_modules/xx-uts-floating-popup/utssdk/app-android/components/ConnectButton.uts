@@ -1,0 +1,20 @@
+import TextView from "android.widget.TextView";
+import Context from "android.content.Context";
+import Color from "android.graphics.Color";
+import GradientDrawable from "android.graphics.drawable.GradientDrawable";
+
+/**
+ * 连接按钮视图组件
+ */
+export class ConnectButton extends TextView {
+    constructor (context: Context | null){
+        super(context);
+        let drawable1 = new GradientDrawable();
+        drawable1.setColor(Color.parseColor("#0082FC"));
+        drawable1.setCornerRadius((60).toFloat());
+        this.setBackgroundDrawable(drawable1);
+        this.setTextColor(Color.parseColor("#FFFFFF"));
+        this.setPadding(150, 10, 150, 10);
+        this.setText("连接设备");
+    }
+}

@@ -1,0 +1,52 @@
+import ImageView from "android.widget.ImageView";
+import View from "android.view.View";
+import LinearLayout from "android.widget.LinearLayout";
+import Context from "android.content.Context";
+import ActivityManager from "android.app.ActivityManager";
+import RunningAppProcessInfo from "android.app.ActivityManager.RunningAppProcessInfo";
+import { getUniActivity } from "io.dcloud.uts.android";
+
+/**
+ * 获取品牌Logo视图
+ */
+export function getBrandLogo(brandLogoUrl: String, p: View): ImageView {
+    let brandLogo = new ImageView(getUniActivity());
+    // Glide.with(p).load(brandLogoUrl).into(brandLogo);
+    return brandLogo;
+}
+
+/**
+ * 获取品牌Logo的布局参数
+ */
+export function getBrandLogoParms(): LinearLayout.LayoutParams {
+    let brandLogoWidth = (800).toInt();
+    let brandLogoHeight = (brandLogoWidth / 2.47).toInt();
+    let brandLogoParms = new LinearLayout.LayoutParams(brandLogoWidth, brandLogoHeight);
+    return brandLogoParms;
+}
+
+/**
+ * 判断应用是否在后台运行
+ */
+export function isBackground(): boolean {
+    const context = getUniActivity();
+    if(context == null){
+        return false;
+    }
+    const activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager;
+    const appProcesses = activityManager.getRunningAppProcesses();
+    if(appProcesses == null){
+        return false;
+    }
+    const packageName = context.getPackageName();
+    let isBackground = true;
+    // 使用迭代器方式遍历
+    const iterator = appProcesses.iterator();
+    while(iterator.hasNext()){
+        const appProcess = iterator.next();
+        if(appProcess.processName.equals(packageName)){
+            return appProcess.importance !== RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+        }
+    }
+    return isBackground;
+}

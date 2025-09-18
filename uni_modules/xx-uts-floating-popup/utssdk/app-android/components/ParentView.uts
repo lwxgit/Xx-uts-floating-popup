@@ -1,0 +1,29 @@
+import LinearLayout from "android.widget.LinearLayout";
+import Context from "android.content.Context";
+import Gravity from "android.view.Gravity";
+import MATCH_PARENT from "android.view.ViewGroup.LayoutParams.MATCH_PARENT";
+import WRAP_CONTENT from "android.view.ViewGroup.LayoutParams.WRAP_CONTENT";
+import { getUniActivity } from "io.dcloud.uts.android";
+
+import { NoticeView } from "./NoticeView";
+import { CustCloseClick } from "../services/ClickEvents";
+
+// 直接导入CustomViewManager类
+import { CustomViewManager } from "../managers/CustomViewManager";
+
+/**
+ * 全局布局视图组件
+ */
+export class ParentView extends LinearLayout {
+    constructor (context: Context | null, mCustomViewManager: CustomViewManager | null) {
+        super(context);
+        console.log('ParentView constructor');
+        this.setPadding(0, 0, 0, 20);
+        this.setGravity(Gravity.BOTTOM);
+        let cNoticeView = new NoticeView(getUniActivity(), mCustomViewManager);
+        let parms1 = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        this.addView(cNoticeView, parms1);
+        this.setOnClickListener(new CustCloseClick(mCustomViewManager));
+        console.log('ParentView constructor over');
+    }
+}

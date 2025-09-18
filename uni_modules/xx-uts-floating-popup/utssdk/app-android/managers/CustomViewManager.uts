@@ -1,0 +1,91 @@
+import Context from "android.content.Context";
+import WindowManager from "android.view.WindowManager";
+import PixelFormat from "android.graphics.PixelFormat";
+import Gravity from "android.view.Gravity";
+import DisplayMetrics from "android.util.DisplayMetrics";
+import Build from "android.os.Build";
+import { getUniActivity } from "io.dcloud.uts.android";
+import { ParentView } from "../components/ParentView";
+
+/**
+ * 自定义视图管理类
+ */
+export class CustomViewManager {
+    //上下文
+    mContext: Context | null;
+
+    //自定义的FloatView
+    mNoticeView: ParentView | null = null;
+
+    //窗口管理类
+    mWindowManager: WindowManager | null = null;
+
+    constructor (context: Context | null) {
+        console.log("实例化自定义视图管理类");
+        this.mContext = context;
+        this.mWindowManager = getUniActivity()!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager;
+    }
+    
+    /**
+     * @param
+     * @description 移除视图
+     */
+    removeView() {
+        this.mWindowManager!.removeView(this.mNoticeView);
+        // 关闭弹窗时移除视图
+        this.mNoticeView = null;
+    }
+
+    /**
+     * @param
+     * @description 在手机屏幕上显示自定义的FloatView
+     */
+    showFloatViewOnWindow() {
+        console.log('实例化窗口');
+        if(this.mNoticeView == null){
+            this.mNoticeView = new ParentView(getUniActivity(), this);
+        }
+        let parmas = WindowManager.LayoutParams();
+        console.log('设置宽高');
+        
+        // 获取屏幕宽度 设置90%宽度
+        let displayMetrics: DisplayMetrics | null = getUniActivity()?.getResources()?.getDisplayMetrics();
+        let width = displayMetrics?.widthPixels;
+        if(width != null){
+            parmas.width = (width * 0.9).toInt();
+        }else{
+            parmas.width = WindowManager.LayoutParams.MATCH_PARENT;
+        }
+        
+        parmas.height = WindowManager.LayoutParams.MATCH_PARENT;
+        console.log('设置位置');
+        
+        //窗口图案放置位置
+        parmas.gravity = Gravity.BOTTOM;
+        // 如果忽略gravity属性，那么它表示窗口的绝对X位置。
+        parmas.x = 0;
+        //如果忽略gravity属性，那么它表示窗口的绝对Y位置。
+        parmas.y = 100;
+        
+        //根据Android版本设置窗口类型
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            parmas.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            parmas.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        }
+        
+        //FLAG_NOT_FOCUSABLE让window不能获得焦点，这样用户快就不能向该window发送按键事件及按钮事件
+        //FLAG_NOT_TOUCH_MODAL即使在该window在可获得焦点情况下，仍然把该window之外的任何event发送到该window之后的其他window.
+        parmas.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        
+        // 期望的位图格式。默认为不透明。参考android.graphics.PixelFormat。
+        parmas.format = PixelFormat.RGBA_8888;
+        
+        if(this.mNoticeView != null){
+            // mNoticeView存在不添加
+            if(this.mNoticeView?.getWindowToken() == null){
+                this.mWindowManager!.addView(this.mNoticeView, parmas);
+            }
+        }
+    }
+}
