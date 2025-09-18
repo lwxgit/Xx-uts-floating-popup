@@ -5,6 +5,14 @@
 			"style": {
 				"navigationBarTitleText": "悬浮窗"
 			}
+		},
+		{
+			"path": "pages/test/test",
+			"style": {
+				"navigationBarTitleText": "悬浮窗测试工具",
+				"navigationBarBackgroundColor": "#007aff",
+				"navigationBarTextStyle": "white"
+			}
 		}
     ],
 	"globalStyle": {
