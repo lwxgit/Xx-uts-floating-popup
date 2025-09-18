@@ -23,9 +23,9 @@
 		methods: {
 			startW(){
 				let deviceInfo = {
-					deviceName: "",
-					brandLogo: "",
-					deviceImage: ""
+					deviceName: "ggggg",
+					brandLogo: "https://pics4.baidu.com/feed/42a98226cffc1e17573493b9b52c0d06718de9f6.jpeg",
+					deviceImage: "https://pics4.baidu.com/feed/42a98226cffc1e17573493b9b52c0d06718de9f6.jpeg"
 				}
 				startFloating(deviceInfo,()=>{
 					console.log('触发回调')

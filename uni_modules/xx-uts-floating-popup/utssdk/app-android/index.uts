@@ -9,7 +9,7 @@ import { getUniActivity, getAppContext } from "io.dcloud.uts.android";
 import { FloatService } from "./services/FloatService";
 
 // 导入事件处理相关
-import { custCallback } from "./services/ClickEvents";
+import { onCustCallback } from "./services/ClickEvents";
 
 // 全局设备信息
 export let custDeviceInfo: UTSJSONObject | null = null;
@@ -19,22 +19,22 @@ export let custDeviceInfo: UTSJSONObject | null = null;
  * @param deviceInfo 设备信息
  * @param success 成功回调函数
  */
+@UTSJS.keepAlive
 export function startFloating(deviceInfo: UTSJSONObject, success: UTSCallback) {
     console.log('call startFloating');
     try {
         // 尝试获取外部缓存目录路径并打印日志
-        const appContext = getAppContext();
-        if (appContext != null) {
-            const externalCacheDir = appContext.getExternalCacheDir();
-            if (externalCacheDir != null) {
-                console.log(externalCacheDir.getPath());
-            }
-        }
+        // const appContext = getAppContext();
+        // if (appContext != null) {
+        //     const externalCacheDir = appContext.getExternalCacheDir();
+        //     if (externalCacheDir != null) {
+        //         console.log(externalCacheDir.getPath());
+        //     }
+        // }
         
         // 设置回调函数和设备信息
-        // 直接使用导出的变量
-        // 在UTS中不能通过globalThis访问这些变量
-        custCallback = success;
+        // 使用函数方式设置回调，符合UTS插件规范
+        onCustCallback(success);
         custDeviceInfo = deviceInfo;
         
         // 启动浮动服务

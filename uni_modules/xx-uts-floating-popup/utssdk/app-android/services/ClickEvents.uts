@@ -6,8 +6,29 @@ import { isBackground } from "../utils/ViewUtils";
 // 直接导入CustomViewManager类
 import { CustomViewManager } from "../managers/CustomViewManager";
 
-// 全局回调和设备信息变量
-export let custCallback: UTSCallback | null = null;
+/**
+ * 回调函数管理
+ * 根据UTS插件文档优化，使用函数方式管理回调，支持keepalive
+ */
+// 内部存储回调函数
+let _custCallback: UTSCallback | null = null;
+
+/**
+ * 设置回调函数
+ * @param callback 回调函数
+ */
+export function onCustCallback(callback: UTSCallback | null): void {
+    _custCallback = callback;
+}
+
+/**
+ * 获取当前回调函数
+ * @returns 当前设置的回调函数
+ */
+export function getCustCallback(): UTSCallback | null {
+    return _custCallback;
+}
+
 
 /**
  * 连接点击事件处理类
@@ -18,6 +39,7 @@ export class CustClick extends View.OnClickListener {
         super();
         this.mCustomViewManager = customViewManager;
     }
+	
     override onClick(v : View){
         console.log('call CustClick');
         if(this.mCustomViewManager != null){
@@ -28,8 +50,9 @@ export class CustClick extends View.OnClickListener {
                 getUniActivity()?.startActivity(new Intent(getUniActivity(), getUniActivity()!.javaClass));
             }
             // 使用导出的回调函数
-            if(custCallback != null){
-                custCallback!();
+            const callback = getCustCallback();
+            if(callback != null){
+                callback();
             }
         }else{
             console.log('call CustClick fail');

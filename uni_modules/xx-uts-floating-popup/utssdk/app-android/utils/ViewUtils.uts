@@ -6,12 +6,14 @@ import ActivityManager from "android.app.ActivityManager";
 import RunningAppProcessInfo from "android.app.ActivityManager.RunningAppProcessInfo";
 import { getUniActivity } from "io.dcloud.uts.android";
 
+import Glide from "com.bumptech.glide.Glide";
+
 /**
  * 获取品牌Logo视图
  */
 export function getBrandLogo(brandLogoUrl: String, p: View): ImageView {
     let brandLogo = new ImageView(getUniActivity());
-    // Glide.with(p).load(brandLogoUrl).into(brandLogo);
+    Glide.with(p).load(brandLogoUrl).into(brandLogo);
     return brandLogo;
 }
 

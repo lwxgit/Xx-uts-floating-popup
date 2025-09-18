@@ -68,8 +68,9 @@ export class NoticeView extends LinearLayout {
         // 尝试从全局设备信息获取设备名称
         // 使用局部变量解决Smart cast问题
         const localDeviceInfo = custDeviceInfo;
-        if(localDeviceInfo != null && localDeviceInfo.name != null){
-            deviceNameText = localDeviceInfo.name.toString();
+		console.log('localDeviceInfo', localDeviceInfo);
+        if(localDeviceInfo != null && localDeviceInfo.deviceName != null){
+            deviceNameText = localDeviceInfo.deviceName.toString();
         }
         let deviceName = new DeviceNameView(getUniActivity(), deviceNameText);
         let deviceNameParms = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
