@@ -1,0 +1,87 @@
+import LinearLayout from "android.widget.LinearLayout";
+import Context from "android.content.Context";
+import Gravity from "android.view.Gravity";
+import Color from "android.graphics.Color";
+import GradientDrawable from "android.graphics.drawable.GradientDrawable";
+import MATCH_PARENT from "android.view.ViewGroup.LayoutParams.MATCH_PARENT";
+import WRAP_CONTENT from "android.view.ViewGroup.LayoutParams.WRAP_CONTENT";
+import { getUniActivity } from "io.dcloud.uts.android";
+
+import { CloseButton } from "./CloseButton";
+import { DeviceNameView } from "./DeviceNameView";
+import { ConnectButton } from "./ConnectButton";
+import { CustClick } from "../services/ClickEvents";
+import { CustCloseClick } from "../services/ClickEvents";
+import { CustNoCloseClick } from "../services/ClickEvents";
+import { getBrandLogo } from "../utils/ViewUtils";
+import { getBrandLogoParms } from "../utils/ViewUtils";
+import { custDeviceInfo } from "../index";
+
+// 直接导入CustomViewManager类
+import { CustomViewManager } from "../managers/CustomViewManager";
+
+/**
+ * 通知自定义视图组件
+ */
+export class NoticeView extends LinearLayout {
+    mCustClick: CustClick | null = null;
+    mCustCloseClick: CustCloseClick | null = null;
+
+    constructor (context: Context | null, mCustomViewManager: CustomViewManager | null) {
+        super(context);
+        console.log('NoticeView constructor');
+        this.setOnClickListener(new CustNoCloseClick());
+        // 设置元素排版 垂直
+        this.setOrientation(LinearLayout.VERTICAL);
+        // 设置元素水平居中
+        this.setGravity(Gravity.CENTER_HORIZONTAL);
+        // 设置内边距
+        this.setPadding(50, 50, 50, 50);
+        let drawable = new GradientDrawable();
+        drawable.setCornerRadius((60).toFloat());
+        drawable.setColor(Color.parseColor("#FFFFFF"));
+        this.setBackground(drawable);
+        console.log('设置方向 背景');
+        
+        // 设置关闭按钮
+        console.log('设置关闭按钮');
+        let buttonClose = new CloseButton(getUniActivity());
+        let parmsLl = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        let parmsClose = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        this.mCustCloseClick = new CustCloseClick(mCustomViewManager);
+        buttonClose.setOnClickListener(this.mCustCloseClick);
+        let ll = new LinearLayout(context);
+        ll.addView(buttonClose, parmsClose);
+        ll.setGravity(Gravity.RIGHT);
+        this.addView(ll, parmsLl);
+        
+        // 设置图片
+        console.log('设置图片');
+        let brandLogoUrl: String = "https://pics4.baidu.com/feed/42a98226cffc1e17573493b9b52c0d06718de9f6.jpeg";
+        let brandLogo = getBrandLogo(brandLogoUrl, this);
+        let brandLogoParms = getBrandLogoParms();
+        this.addView(brandLogo, brandLogoParms);
+        
+        // 设置文本
+        console.log('设置设备名称');
+        let deviceNameText: String = 'AirPods';
+        // 尝试从全局设备信息获取设备名称
+        // 使用局部变量解决Smart cast问题
+        const localDeviceInfo = custDeviceInfo;
+		console.log('localDeviceInfo', localDeviceInfo);
+        if(localDeviceInfo != null && localDeviceInfo.deviceName != null){
+            deviceNameText = localDeviceInfo.deviceName.toString();
+        }
+        let deviceName = new DeviceNameView(getUniActivity(), deviceNameText);
+        let deviceNameParms = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        this.addView(deviceName, deviceNameParms);
+        
+        // 设置按钮
+        let button = new ConnectButton(getUniActivity());
+        let parms1 = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        this.addView(button, parms1);
+        this.mCustClick = new CustClick(mCustomViewManager);
+        button.setOnClickListener(this.mCustClick);
+        console.log('设置连接按钮');
+    }
+}

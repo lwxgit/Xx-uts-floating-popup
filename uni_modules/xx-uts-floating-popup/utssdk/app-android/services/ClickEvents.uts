@@ -1,0 +1,90 @@
+import View from "android.view.View";
+import Intent from "android.content.Intent";
+import { getUniActivity } from "io.dcloud.uts.android";
+import { isBackground } from "../utils/ViewUtils";
+
+// 直接导入CustomViewManager类
+import { CustomViewManager } from "../managers/CustomViewManager";
+
+/**
+ * 回调函数管理
+ * 根据UTS插件文档优化，使用函数方式管理回调，支持keepalive
+ */
+// 内部存储回调函数
+let _custCallback: UTSCallback | null = null;
+
+/**
+ * 设置回调函数
+ * @param callback 回调函数
+ */
+export function onCustCallback(callback: UTSCallback | null): void {
+    _custCallback = callback;
+}
+
+/**
+ * 获取当前回调函数
+ * @returns 当前设置的回调函数
+ */
+export function getCustCallback(): UTSCallback | null {
+    return _custCallback;
+}
+
+
+/**
+ * 连接点击事件处理类
+ */
+export class CustClick extends View.OnClickListener {
+    mCustomViewManager: CustomViewManager | null;
+    constructor (customViewManager: CustomViewManager | null) {
+        super();
+        this.mCustomViewManager = customViewManager;
+    }
+	
+    override onClick(v : View){
+        console.log('call CustClick');
+        if(this.mCustomViewManager != null){
+            this.mCustomViewManager!.removeView();
+            // 如果app在后台 回到原app
+            console.log(isBackground());
+            if(isBackground()){
+                getUniActivity()?.startActivity(new Intent(getUniActivity(), getUniActivity()!.javaClass));
+            }
+            // 使用导出的回调函数
+            const callback = getCustCallback();
+            if(callback != null){
+                callback();
+            }
+        }else{
+            console.log('call CustClick fail');
+        }
+    }
+}
+
+/**
+ * 关闭点击事件处理类
+ */
+export class CustCloseClick extends View.OnClickListener {
+    mCustomViewManager: CustomViewManager | null;
+    constructor (customViewManager: CustomViewManager | null) {
+        super();
+        this.mCustomViewManager = customViewManager;
+    }
+    
+    override onClick(v : View){
+        console.log('call CustCloseClick');
+        if(this.mCustomViewManager != null){
+            this.mCustomViewManager!.removeView();
+        }else{
+            console.log('call CustCloseClick fail');
+        }
+    }
+}
+
+/**
+ * 点击不关闭事件处理类
+ */
+export class CustNoCloseClick extends View.OnClickListener {
+    override onClick(v : View){
+        console.log('CustNoCloseClick');
+    }
+}

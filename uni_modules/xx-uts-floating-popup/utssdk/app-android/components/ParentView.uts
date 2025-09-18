@@ -1,0 +1,40 @@
+import LinearLayout from "android.widget.LinearLayout";
+import Context from "android.content.Context";
+import Gravity from "android.view.Gravity";
+import MATCH_PARENT from "android.view.ViewGroup.LayoutParams.MATCH_PARENT";
+import WRAP_CONTENT from "android.view.ViewGroup.LayoutParams.WRAP_CONTENT";
+import { getUniActivity } from "io.dcloud.uts.android";
+
+import { NoticeView } from "./NoticeView";
+import { CustCloseClick } from "../services/ClickEvents";
+
+// 直接导入CustomViewManager类
+import { CustomViewManager } from "../managers/CustomViewManager";
+
+/**
+ * 全局布局视图组件
+ */
+export class ParentView extends LinearLayout {
+    /**
+     * ParentView构造函数
+     * @param context - 上下文对象，可为null
+     * @param mCustomViewManager - 自定义视图管理器，可为null
+     */
+    constructor (context: Context | null, mCustomViewManager: CustomViewManager | null) {
+        super(context);
+        console.log('ParentView constructor');
+        // 设置内边距
+        this.setPadding(0, 0, 0, 20);
+        // 设置重心位置到底部
+        this.setGravity(Gravity.BOTTOM);
+        // 创建通知视图实例
+        let cNoticeView = new NoticeView(getUniActivity(), mCustomViewManager);
+        // 创建布局参数
+        let parms1 = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        // 添加通知视图到当前视图中
+        this.addView(cNoticeView, parms1);
+        // 设置点击监听器
+        this.setOnClickListener(new CustCloseClick(mCustomViewManager));
+        console.log('ParentView constructor over');
+    }
+}

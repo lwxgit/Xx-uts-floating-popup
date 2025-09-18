@@ -1,7 +1,7 @@
 {
   "id": "xx-uts-floating-popup",
   "displayName": "uts android 悬浮窗示例",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "基于uniapp和uts开放的安卓悬浮窗",
   "keywords": [
     "uts",
@@ -10,7 +10,7 @@
 ],
   "repository": "https://github.com/lwxgit/Xx-uts-floating-popup",
   "engines": {
-    "HBuilderX": "^3.99"
+    "HBuilderX": "^4.57"
   },
   "dcloudext": {
     "type": "uts",
@@ -38,7 +38,8 @@
     "platforms": {
       "cloud": {
         "tcb": "y",
-        "aliyun": "y"
+        "aliyun": "y",
+        "alipay": "n"
       },
       "client": {
         "Vue": {
@@ -46,10 +47,11 @@
           "vue3": "y"
         },
         "App": {
-          "app-android": {
-            "minVersion": "21"
-        },
-          "app-ios": "n"
+            "app-android": {
+                "minVersion": "21"
+            },
+            "app-ios": "n",
+            "app-harmony": "u"
         },
         "H5-mobile": {
           "Safari": "n",
